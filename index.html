@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的專屬塔羅抽牌</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+        .card-container {
+            margin: 20px auto;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 12px;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .card-title {
+            font-size: 24px;
+            color: #e94560;
+            font-weight: bold;
+        }
+        .card-position {
+            font-size: 18px;
+            color: #00fff5;
+            margin: 10px 0;
+        }
+        .card-meaning {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #ddd;
+        }
+        button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #00fff5;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✨ 專屬塔羅牌線上抽牌 ✨</h1>
+    <p>心裡默想你的問題，然後按下下方按鈕：</p>
+    
+    <button onclick="drawTarotCard()">開始抽牌</button>
+
+    <div class="card-container" id="result-box" style="display:none;">
+        <div class="card-title" id="card-name">--</div>
+        <div class="card-position" id="card-position">--</div>
+        <div class="card-meaning" id="card-meaning">--</div>
+    </div>
+
+    <script>
+        // 🔮 塔羅牌資料庫 (你可以自行修改牌名與牌義，就像修改 Table 資料一樣)
+        const tarotDeck = [
+            {
+                name: "0. 愚者 (The Fool)",
+                upright: "【正位】新的開始、冒險、自由、隨性、無限可能性。",
+                reversed: "【逆位】輕率、魯莽、缺乏計劃、不負責任、盲目冒險。"
+            },
+            {
+                name: "I. 魔術師 (The Magician)",
+                upright: "【正位】創造力、主動性、資源豐富、技巧熟練、展現能力。",
+                reversed: "【逆位】意志力薄弱、欺騙、延誤、技術不成熟、缺乏目標。"
+            },
+            {
+                name: "II. 女祭司 (The High Priestess)",
+                upright: "【正位】直覺、潛意識、智慧、冷靜、等待時機。",
+                reversed: "【逆位】情緒化、壓抑情感、聽信謠言、忽視直覺。"
+            },
+            {
+                name: "III. 皇后 (The Empress)",
+                upright: "【正位】豐收、愛、滋養、創造力、物質享受。",
+                reversed: "【逆位】缺乏安全感、過度依賴、浪費、缺乏創造力。"
+            },
+            {
+                name: "IV. 皇帝 (The Emperor)",
+                upright: "【正位】領導力、秩序、穩定、權威、結構化。",
+                reversed: "【逆位】控制欲過強、固執、專制、缺乏彈性。"
+            }
+        ];
+
+        function drawTarotCard() {
+            // 類似 Oracle 的 NVL/DECODE 邏輯：隨機選取陣列中的索引
+            const randomIndex = Math.floor(Math.random() * tarotDeck.length);
+            // 隨機決定正逆位 (50% 機率)
+            const isUpright = Math.random() >= 0.5;
+            
+            const selectedCard = tarotDeck[randomIndex];
+
+            // 將結果寫入 HTML 頁面
+            document.getElementById("card-name").innerText = selectedCard.name;
+            document.getElementById("card-position").innerText = isUpright ? "正位 (Upright)" : "逆位 (Reversed)";
+            document.getElementById("card-meaning").innerText = isUpright ? selectedCard.upright : selectedCard.reversed;
+            
+            // 顯示結果框
+            document.getElementById("result-box").style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
