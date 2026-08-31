@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的專屬塔羅抽牌</title>
+    <title>小樹懶的專屬塔羅抽牌</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,36 +12,23 @@
             text-align: center;
             padding: 20px;
         }
-        .card-container {
-            margin: 20px auto;
-            padding: 20px;
-            background: #16213e;
-            border-radius: 12px;
-            max-width: 400px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        .controls {
+            margin: 20px 0;
         }
-        .card-title {
-            font-size: 24px;
-            color: #e94560;
-            font-weight: bold;
-        }
-        .card-position {
-            font-size: 18px;
-            color: #00fff5;
-            margin: 10px 0;
-        }
-        .card-meaning {
+        select, button {
+            padding: 10px 15px;
             font-size: 16px;
-            line-height: 1.5;
-            color: #ddd;
+            border-radius: 6px;
+            border: none;
+            margin: 5px;
+        }
+        select {
+            background-color: #0f3460;
+            color: #fff;
         }
         button {
             background-color: #e94560;
             color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 18px;
-            border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
         }
@@ -49,66 +36,174 @@
             background-color: #00fff5;
             color: #000;
         }
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .card-container {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 15px;
+            width: 250px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-align: left;
+        }
+        .card-title {
+            font-size: 18px;
+            color: #e94560;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .card-position {
+            font-size: 14px;
+            color: #00fff5;
+            margin-bottom: 8px;
+        }
+        .card-meaning {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #ddd;
+        }
     </style>
 </head>
 <body>
 
     <h1>✨ 專屬塔羅牌線上抽牌 ✨</h1>
-    <p>心裡默想你的問題，然後按下下方按鈕：</p>
+    <p>心裡默想你的問題，選擇抽牌數量後點擊開始：</p>
     
-    <button onclick="drawTarotCard()">開始抽牌</button>
-
-    <div class="card-container" id="result-box" style="display:none;">
-        <div class="card-title" id="card-name">--</div>
-        <div class="card-position" id="card-position">--</div>
-        <div class="card-meaning" id="card-meaning">--</div>
+    <div class="controls">
+        <label for="cardCount">選擇張數：</label>
+        <select id="cardCount">
+            <option value="1">抽 1 張 (單張指引)</option>
+            <option value="3" selected>抽 3 張 (時間/問題展開)</option>
+            <option value="5">抽 5 張 (深度剖析)</option>
+        </select>
+        <button onclick="drawTarotCards()">開始抽牌</button>
     </div>
 
+    <div class="card-grid" id="result-box"></div>
+
     <script>
-        // 🔮 塔羅牌資料庫 (你可以自行修改牌名與牌義，就像修改 Table 資料一樣)
+        // 🔮 78 張完整塔羅牌資料庫
         const tarotDeck = [
-            {
-                name: "0. 愚者 (The Fool)",
-                upright: "【正位】新的開始、冒險、自由、隨性、無限可能性。",
-                reversed: "【逆位】輕率、魯莽、缺乏計劃、不負責任、盲目冒險。"
-            },
-            {
-                name: "I. 魔術師 (The Magician)",
-                upright: "【正位】創造力、主動性、資源豐富、技巧熟練、展現能力。",
-                reversed: "【逆位】意志力薄弱、欺騙、延誤、技術不成熟、缺乏目標。"
-            },
-            {
-                name: "II. 女祭司 (The High Priestess)",
-                upright: "【正位】直覺、潛意識、智慧、冷靜、等待時機。",
-                reversed: "【逆位】情緒化、壓抑情感、聽信謠言、忽視直覺。"
-            },
-            {
-                name: "III. 皇后 (The Empress)",
-                upright: "【正位】豐收、愛、滋養、創造力、物質享受。",
-                reversed: "【逆位】缺乏安全感、過度依賴、浪費、缺乏創造力。"
-            },
-            {
-                name: "IV. 皇帝 (The Emperor)",
-                upright: "【正位】領導力、秩序、穩定、權威、結構化。",
-                reversed: "【逆位】控制欲過強、固執、專制、缺乏彈性。"
-            }
+            // 大阿卡納 (22張)
+            { name: "0. 愚者 (The Fool)", upright: "【正位】新的開始、冒險、自由、隨性、無限可能性。", reversed: "【逆位】輕率、魯莽、缺乏計劃、不負責任、盲目冒險。" },
+            { name: "I. 魔術師 (The Magician)", upright: "【正位】創造力、主動性、資源豐富、技巧熟練、展現能力。", reversed: "【逆位】意志力薄弱、欺騙、延誤、技術不成熟、缺乏目標。" },
+            { name: "II. 女祭司 (The High Priestess)", upright: "【正位】直覺、潛意識、智慧、冷靜、等待時機。", reversed: "【逆位】情緒化、壓抑情感、聽信謠言、忽視直覺。" },
+            { name: "III. 皇后 (The Empress)", upright: "【正位】豐收、愛、滋養、創造力、物質享受。", reversed: "【逆位】缺乏安全感、過度依賴、浪費、缺乏創造力。" },
+            { name: "IV. 皇帝 (The Emperor)", upright: "【正位】領導力、秩序、穩定、權威、結構化。", reversed: "【逆位】控制欲過強、固執、專制、缺乏彈性。" },
+            { name: "V. 教皇 (The Hierophant)", upright: "【正位】傳統、援助、尋求指引、同盟、精神信仰。", reversed: "【逆位】固執、過度保守、打破規範、聽信偽善者的建言。" },
+            { name: "VI. 戀人 (The Lovers)", upright: "【正位】選擇、合夥、愛、價值觀一致、和諧關係。", reversed: "【逆位】選擇困難、關係不和諧、價值觀衝突、背叛。" },
+            { name: "VII. 戰車 (The Chariot)", upright: "【正位】意志力、突破、成功、自律、克服困難。", reversed: "【逆位 me】失控、挫折、缺乏方向感、衝動致禍。" },
+            { name: "VIII. 力量 (Strength)", upright: "【正位】勇氣、耐心、以柔克剛、自信、掌控情緒。", reversed: "【逆位】自卑、缺乏自信、情緒化、失控、軟弱。" },
+            { name: "IX. 隱士 (The Hermit)", upright: "【正位】內省、尋求真理、獨處、沉思、指引。", reversed: "【逆位】孤立、偏執、退縮、孤僻、忽視建議。" },
+            { name: "X. 命運之輪 (Wheel of Fortune)", upright: "【正位】轉機、好運、命運轉折、循環、突破現狀。", reversed: "【逆位】運氣不佳、抗拒改變、陷入低潮、無法掌控。" },
+            { name: "XI. 正義 (Justice)", upright: "【正位】公平、客觀、因果責任、理智決定、法律事項。", reversed: "【逆位】不公不義、偏見、逃避責任、錯誤的決定。" },
+            { name: "XII. 倒吊人 (The Hanged Man)", upright: "【正位】換位思考、犧牲、等待、新的視角、放手。", reversed: "【逆位】無謂的犧牲、拖延、無動於衷、抗拒成長。" },
+            { name: "XIII. 死神 (Death)", upright: "【正位】結束、轉變、新生、告別過去、徹底洗牌。", reversed: "【逆位】恐懼改變、拖延結束、停滯不前、抱殘守缺。" },
+            { name: "XIV. 節制 (Temperance)", upright: "【正位】平衡、調和、耐心、適度、跨界整合。", reversed: "【逆位】失去平衡、過度極端、溝通不良、缺乏自我控制。" },
+            { name: "XV. 惡魔 (The Devil)", upright: "【正位】物質慾望、束縛、執著、上癮、誘惑。", reversed: "【逆位】打破束縛、擺脫控管、覺醒、重獲自由。" },
+            { name: "XVI. 高塔 (The Tower)", upright: "【正位】突發劇變、體制崩塌、打破幻想、驟變、震撼覺醒。", reversed: "【逆位】險境餘生、抗拒變革、漸進式危機。" },
+            { name: "XVII. 星星 (The Star)", upright: "【正位】希望、靈感、療癒、信心、平靜。", reversed: "【逆位】失望、絕望、缺乏信心、理想破滅。" },
+            { name: "XVIII. 月亮 (The Moon)", upright: "【正位】不安、迷惘、潛意識、隱藏的危機、直覺。", reversed: "【逆位】撥雲見日、真相大白、克服恐懼、不解自破。" },
+            { name: "XIX. 太陽 (The Sun)", upright: "【正位】成功、喜悅、活力、光明、自信。", reversed: "【逆位】延遲成功、暫時低潮、缺乏熱情。" },
+            { name: "XX. 審判 (Judgement)", upright: "【正位】覺醒、重大決定、召喚、因果報應、重生。", reversed: "【逆位】自我懷疑、逃避決斷、自責、錯失良機。" },
+            { name: "XXI. 世界 (The World)", upright: "【正位】圓滿、完成、達成目標、圓滿結束、旅行。", reversed: "【逆位】未完成、缺憾、拖延、缺乏臨門一腳。" },
+
+            // 權杖牌組 (Wands - 14張)
+            { name: "權杖一 (Ace of Wands)", upright: "【正位】新的行動、熱情、靈感、契機。", reversed: "【逆位】缺乏動力、延遲、三分鐘熱度。" },
+            { name: "權杖二 (Two of Wands)", upright: "【正位】規劃未來、決策、跨出舒適圈。", reversed: "【逆位】猶豫不決、恐懼未知、規劃不周。" },
+            { name: "權杖三 (Three of Wands)", upright: "【正位】遠景、擴張、合作、等待成果。", reversed: "【逆位】進展延誤、溝通障礙、眼光短淺。" },
+            { name: "權杖四 (Four of Wands)", upright: "【正位】穩定、慶祝、和諧、建立基礎。", reversed: "【逆位】家庭不和、不穩定、慶祝活動取消。" },
+            { name: "權杖五 (Five of Wands)", upright: "【正位】競爭、衝突、意見不合、混亂。", reversed: "【逆位】化解衝突、逃避爭執、內耗。" },
+            { name: "權杖六 (Six of Wands)", upright: "【正位】勝利、獲得認同、自信、榮耀。", reversed: "【逆位】失敗、受挫、自大、缺乏認同。" },
+            { name: "權杖七 (Seven of Wands)", upright: "【正位】堅守立場、防禦、克服挑戰。", reversed: "【逆位】放棄、屈服、備受壓迫。" },
+            { name: "權杖八 (Eight of Wands)", upright: "【正位】迅速發展、訊息傳遞、行動力。", reversed: "【逆位】延誤、混亂、溝通中斷。" },
+            { name: "權杖九 (Nine of Wands)", upright: "【正位】戒備、堅持到底、最後考驗。", reversed: "【逆位】疲憊不堪、防禦崩潰、放棄。" },
+            { name: "權杖十 (Ten of Wands)", upright: "【正位】負擔沉重、壓力過大、責任。", reversed: "【逆位】釋放壓力、不堪重負、崩潰。" },
+            { name: "權杖侍者 (Page of Wands)", upright: "【正位】好奇心、探索、新消息、熱情。", reversed: "【逆位】缺乏方向、幼稚、壞消息。" },
+            { name: "權杖騎士 (Knight of Wands)", upright: "【正位】衝勁、冒險、果斷行動。", reversed: "【逆位】魯莽、衝動、性格暴躁。" },
+            { name: "權杖皇后 (Queen of Wands)", upright: "【正位】自信、熱情、魅力、獨立。", reversed: "【逆位】嫉妒、控制欲強、情緒化。" },
+            { name: "權杖國王 (King of Wands)", upright: "【正位】領袖魅力、遠見、開創力。", reversed: "【逆位】專制、衝動、嚴苛。" },
+
+            // 聖杯牌組 (Cups - 14張)
+            { name: "聖杯一 (Ace of Cups)", upright: "【正位】新感情、情感豐沛、直覺、愛。", reversed: "【逆位】情感壓抑、空虛、感情受挫。" },
+            { name: "聖杯二 (Two of Cups)", upright: "【正位】互信合作、戀情、和諧關係。", reversed: "【逆位】關係破裂、誤解、溝通障礙。" },
+            { name: "聖杯三 (Three of Cups)", upright: "【正位】歡慶、友誼、聚會、合作愉快。", reversed: "【逆位】過度享樂、小三介入、排外。" },
+            { name: "聖杯四 (Four of Cups)", upright: "【正位】倦怠、思考、無視新機會。", reversed: "【逆位】重新出發、接受新機會、覺醒。" },
+            { name: "聖杯五 (Five of Cups)", upright: "【正位】悲傷、關注失去、悔恨。", reversed: "【逆位】走出陰霾、接納現實、重新開始。" },
+            { name: "聖杯六 (Six of Cups)", upright: "【正位】懷念過去、童心、贈予、照顧。", reversed: "【逆位】沈溺過去、無法成長、家庭糾紛。" },
+            { name: "聖杯七 (Seven of Cups)", upright: "【正位】幻想、選擇過多、白日夢。", reversed: "【逆位】清醒、看清現實、做出選擇。" },
+            { name: "聖杯八 (Eight of Cups)", upright: "【正位】尋求更高追求、離去、轉變。", reversed: "【逆位】害怕改變、停滯不前、猶豫。" },
+            { name: "聖杯九 (Nine of Cups)", upright: "【正位】願望實現、滿足、物質享受。", reversed: "【逆位】過度自滿、物質空虛、貪婪。" },
+            { name: "聖杯十 (Ten of Cups)", upright: "【正位】家庭美滿、和諧、情感圓滿。", reversed: "【逆位】家庭衝突、價值觀不合。" },
+            { name: "聖杯侍者 (Page of Cups)", upright: "【正位】感性、好消息、直覺、靈感。", reversed: "【逆位】情緒化、不成熟、情感傷害。" },
+            { name: "聖杯騎士 (Knight of Cups)", upright: "【正位】浪漫、追求、邀請、理想主義。", reversed: "【逆位】花心、過度幻想、情緒起伏。" },
+            { name: "聖杯皇后 (Queen of Cups)", upright: "【正位】溫柔、同理心、直覺強、滋養。", reversed: "【逆位】情緒勒索、過度敏感、自憐。" },
+            { name: "聖杯國王 (King of King)", upright: "【正位】情感穩定、包容、智慧、成熟。", reversed: "【逆位】情緒控管佳、冷酷、暗中操縱。" },
+
+            // 寶劍牌組 (Swords - 14張)
+            { name: "寶劍一 (Ace of Swords)", upright: "【正位】理智、突破、心智敏銳、真相。", reversed: "【逆位】混亂、誤導、濫用權力。" },
+            { name: "寶劍二 (Two of Swords)", upright: "【正位】逃避抉擇、僵局、抗拒面對。", reversed: "【逆位】打破僵局、看清真相。" },
+            { name: "寶劍三 (Three of Swords)", upright: "【正位】心碎、痛苦、背叛、傷痛。", reversed: "【逆位】傷痛療癒、釋懷、原諒。" },
+            { name: "寶劍四 (Four of Swords)", upright: "【正位】休息、養精蓄銳、休戰。", reversed: "【逆位】重新行動、焦慮、無法休息。" },
+            { name: "寶劍五 (Five of Swords)", upright: "【正位】雙輸局面的爭執、自私、傷人。", reversed: "【逆位】尋求和解、收拾殘局。" },
+            { name: "寶劍六 (Six of Swords)", upright: "【正位】渡過難關、漸入佳境、旅行。", reversed: "【逆位】陷入困境、無法前進。" },
+            { name: "寶劍七 (Seven of Swords)", upright: "【正位】欺瞞、策略、私下行動。", reversed: "【逆位】坦白、計謀暴露、悔改。" },
+            { name: "寶劍八 (Eight of Swords)", upright: "【正位】受困、思想限制、無助感。", reversed: "【逆位】打破限制、重獲自由。" },
+            { name: "寶劍九 (Nine of Swords)", upright: "【正位】焦慮、噩夢、絕望、睡不好。", reversed: "【逆位】擺脫焦慮、面對恐懼。" },
+            { name: "寶劍十 (Ten of Swords)", upright: "【正位】谷底、結束、絕路、背叛。", reversed: "【逆位】否極泰來、重獲新生。" },
+            { name: "寶劍侍者 (Page of Swords)", upright: "【正位】警覺、好奇、蒐集情報。", reversed: "【逆位】口舌之爭、流言蜚語。" },
+            { name: "寶劍騎士 (Knight of Swords)", upright: "【正位】行動迅速、果斷、直來直往。", reversed: "【逆位】魯莽、說話傷人、衝動。" },
+            { name: "寶劍皇后 (Queen of Swords)", upright: "【正位】獨立、理性、斷捨離、敏銳。", reversed: "【逆位】冷酷、尖酸刻薄、偏見。" },
+            { name: "寶劍國王 (King of Swords)", upright: "【正位】權威、理智決定、專業力量。", reversed: "【逆位】冷酷無情、嚴苛、濫用權力。" },
+
+            // 錢幣牌組 (Pentacles - 14張)
+            { name: "錢幣一 (Ace of Pentacles)", upright: "【正位】新財富、實質機會、穩定基礎。", reversed: "【逆位】錯失商機、財務損失、浪費。" },
+            { name: "錢幣二 (Two of Pentacles)", upright: "【正位】收支平衡、彈性應變、多方兼顧。", reversed: "【逆位】財務失衡、周轉不靈。" },
+            { name: "錢幣三 (Three of Pentacles)", upright: "【正位】團隊合作、專業技術、建立。", reversed: "【逆位】缺乏合作、品質低落。" },
+            { name: "錢幣四 (Four of Pentacles)", upright: "【正位】保守、守財、固執、維持現狀。", reversed: "【逆位】過度揮霍、物質不安。" },
+            { name: "錢幣五 (Five of Pentacles)", upright: "【正位】物質困頓、孤立無援、健康問題。", reversed: "【逆位】狀況好轉、脫離困境。" },
+            { name: "錢幣六 (Six of Pentacles)", upright: "【正位】施與受、資源共享、公平。", reversed: "【逆位】分配不公、利用他人。" },
+            { name: "錢幣七 (Seven of Pentacles)", upright: "【正位】評估成果、耐心等待、思考下一步。", reversed: "【逆位】投資失利、缺乏耐心。" },
+            { name: "錢幣八 (Eight of Pentacles)", upright: "【正位】專注細節、精益求精、努力工作。", reversed: "【逆位】缺乏專注、三分鐘熱度。" },
+            { name: "錢幣九 (Nine of Pentacles)", upright: "【正位】物質豐盛、獨立、享受生活。", reversed: "【逆位】過度消費、依靠他人。" },
+            { name: "錢幣十 (Ten of Pentacles)", upright: "【正位】家族事業、長期穩定、富足。", reversed: "【逆位】遺產糾紛、家族衝突。" },
+            { name: "錢幣侍者 (Page of Pentacles)", upright: "【正位】學習新技能、務實、好消息。", reversed: "【逆位】缺乏目標、目光短淺。" },
+            { name: "錢幣騎士 (Knight of Pentacles)", upright: "【正位】踏實、責任感、勤奮、穩定。", reversed: "【逆位】偷懶、過度固執、僵化。" },
+            { name: "錢幣皇后 (Queen of Pentacles)", upright: "【正位】務實、照顧他人、慷慨、穩定。", reversed: "【逆位】過度物質主義、忽視自我。" },
+            { name: "錢幣國王 (King of Pentacles)", upright: "【正位】商業成功、富裕、值得信賴。", reversed: "【逆位】唯利是圖、貪婪、商業失敗。" }
         ];
 
-        function drawTarotCard() {
-            // 類似 Oracle 的 NVL/DECODE 邏輯：隨機選取陣列中的索引
-            const randomIndex = Math.floor(Math.random() * tarotDeck.length);
-            // 隨機決定正逆位 (50% 機率)
-            const isUpright = Math.random() >= 0.5;
-            
-            const selectedCard = tarotDeck[randomIndex];
+        function drawTarotCards() {
+            const count = parseInt(document.getElementById("cardCount").value);
+            const resultBox = document.getElementById("result-box");
+            resultBox.innerHTML = ""; // 清空舊結果
 
-            // 將結果寫入 HTML 頁面
-            document.getElementById("card-name").innerText = selectedCard.name;
-            document.getElementById("card-position").innerText = isUpright ? "正位 (Upright)" : "逆位 (Reversed)";
-            document.getElementById("card-meaning").innerText = isUpright ? selectedCard.upright : selectedCard.reversed;
+            // 複製一份牌組以進行「不重複抽牌」 (類似 SQL 裡抽取不重複資料)
+            let tempDeck = [...tarotDeck];
             
-            // 顯示結果框
-            document.getElementById("result-box").style.display = "block";
+            for (let i = 0; i < count; i++) {
+                // 取出隨機索引
+                const randomIndex = Math.floor(Math.random() * tempDeck.length);
+                // 抽牌並從剩餘牌組移除 (確保不抽到重複牌)
+                const selectedCard = tempDeck.splice(randomIndex, 1)[0];
+                // 50% 機率正逆位
+                const isUpright = Math.random() >= 0.5;
+
+                // 動態產生 HTML 卡片結構
+                const cardElement = document.createElement("div");
+                cardElement.className = "card-container";
+                cardElement.innerHTML = `
+                    <div class="card-title">${i + 1}. ${selectedCard.name}</div>
+                    <div class="card-position">${isUpright ? "【正位】" : "【逆位】"}</div>
+                    <div class="card-meaning">${isUpright ? selectedCard.upright : selectedCard.reversed}</div>
+                `;
+                resultBox.appendChild(cardElement);
+            }
         }
     </script>
 
