@@ -41,7 +41,7 @@
             margin-top: 20px;
         }
         .card-container {
-            background: #16213e;
+            background: #a1b4d4;
             border-radius: 12px;
             padding: 15px;
             width: 260px;
@@ -50,7 +50,7 @@
         }
         .card-title {
             font-size: 18px;
-            color: #5e5e55;
+            color: #babaa0;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -64,6 +64,29 @@
             font-size: 14px;
             line-height: 1.4;
             color: #ddd;
+        }
+        /* 新增：結果整理欄位樣式 */
+        .summary-box {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #2a2c42;
+            border-radius: 8px;
+            display: inline-block;
+            max-width: 800px;
+            width: 90%;
+            border: 1px solid #a4a8de;
+            text-align: center;
+        }
+        .summary-title {
+            font-size: 16px;
+            color: #a4a8de;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .summary-text {
+            font-size: 16px;
+            color: #fff;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -79,7 +102,14 @@
         <button onclick="drawTarotCards(5)">抽 5 張 (深度剖析)</button>
     </div>
 
+    <!-- 卡片詳細顯示區 -->
     <div class="card-grid" id="result-box"></div>
+
+    <!-- 新增：下方結果整理區塊 -->
+    <div class="summary-box" id="summary-container" style="display: none;">
+        <div class="summary-title">📋 抽牌結果整理</div>
+        <div class="summary-text" id="summary-text"></div>
+    </div>
 
     <script>
         // 🔮 78 張完整塔羅牌資料庫
@@ -178,14 +208,22 @@
             const resultBox = document.getElementById("result-box");
             resultBox.innerHTML = ""; // 清空舊結果
 
-            // 複製一份牌組以進行不重複抽牌
             let tempDeck = [...tarotDeck];
+            let summaryList = []; // 用來收集簡短結果的陣列
             
             for (let i = 0; i < count; i++) {
                 const randomIndex = Math.floor(Math.random() * tempDeck.length);
                 const selectedCard = tempDeck.splice(randomIndex, 1)[0];
                 const isUpright = Math.random() >= 0.5;
 
+                // 1. 去除英文牌名（利用正則表達式把括號及英文移除）
+                const chineseName = selectedCard.name.replace(/\s*\(.*?\)/, "");
+                const positionText = isUpright ? "正位" : "逆位";
+
+                // 2. 存入結果整理陣列 (如: "0. 愚者 正位")
+                summaryList.push(`${chineseName} ${positionText}`);
+
+                // 3. 渲染個別詳細卡片
                 const cardElement = document.createElement("div");
                 cardElement.className = "card-container";
                 cardElement.innerHTML = `
@@ -195,6 +233,12 @@
                 `;
                 resultBox.appendChild(cardElement);
             }
+
+            // 4. 用頓號（、）串接所有項目並寫入下方整理區塊
+            const summaryContainer = document.getElementById("summary-container");
+            const summaryText = document.getElementById("summary-text");
+            summaryText.innerText = summaryList.join("、");
+            summaryContainer.style.display = "inline-block"; // 顯示總結區塊
         }
     </script>
 
